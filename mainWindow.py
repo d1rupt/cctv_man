@@ -31,26 +31,26 @@ class MainWindow(QMainWindow):
         # TODO: read from settings file and display them under change add_action
         ip = new.addAction("IP")
         usb = new.addAction("USB")
-        ip.triggered.connect(lambda x: self.open_new_cam(x, "IP"))
-        usb.triggered.connect(lambda x: self.open_new_cam(x, "USB"))
+        ip.triggered.connect(lambda x: self.open_new_cam("IP"))
+        usb.triggered.connect(lambda x: self.open_new_cam("USB"))
 
         menu.addMenu(settings)
         self.layout = QGridLayout()
-        self.button = QPushButton("Test")
-        self.layout.addWidget(self.button,0,0)
 
         container = QWidget()
 
-        self.labelcam1 = QLabel(self)
+        self.labelcam1 = QLabel()
         self.labelcam1.resize(640, 480)
 
         self.layout.addWidget(self.labelcam1,0,1)
 
-        self.labelcam2 = QLabel(self)
+        self.labelcam2 = QLabel()
         self.labelcam2.resize(640, 480)
         self.layout.addWidget(self.labelcam2, 1, 1)
 
         container.setLayout(self.layout)
+        self.setCentralWidget(container)
+
 
         #TODO: read from config file & start dis shit
         #TODO: async video capture!
@@ -62,7 +62,7 @@ class MainWindow(QMainWindow):
             self.threads.append(camThread(int(id)))
         print(f"Running {min(2,len(self.threads))} cams")
         for i in range(min(2,len(self.threads))):
-            #self.threads[i].change_pixmap_signal.connect(lambda cv_img: self.upd_cam(cv_img, i))
+            self.threads[i].change_pixmap_signal.connect(lambda cv_img: self.upd_cam(cv_img, i))
             self.threads[i].start()
         #TODO: for now, shows only 2 first cams! Make usr choose
 
@@ -83,7 +83,6 @@ class MainWindow(QMainWindow):
         pixmap = convert_cv_qt(cv_img)
         if i == 0:
             print("UPDATING LABEL 1!")
-            self.labelcam1.setText("Updating...")
             self.labelcam1.setPixmap(pixmap)
             print("LABEL 1 updated")
         else:
