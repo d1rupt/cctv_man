@@ -17,6 +17,8 @@ class camThread(QThread):
         super().__init__()
         self.id = id
         self.run = True
+    #TODO: this is a USB only capture. id - is not USB cam id.
+    #change this to capture IP ALSO!!!
     def run(self):
         c = cv2.VideoCapture(self.id)
 

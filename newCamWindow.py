@@ -1,12 +1,13 @@
 import json
 
 from PyQt6.QtWidgets import *
-from detectCameras import list_cameras_ids
+from detectCameras import list_cameras_ids, read_config
 from json import *
 
 class newCamWindow(QMainWindow):
     def __init__(self, type):
         super().__init__()
+        self.js = read_config()
         self.type = type
         self.setWindowTitle(f"New camera - {type}")
         self.setMinimumSize(500, 500)
@@ -124,12 +125,14 @@ class newCamWindow(QMainWindow):
         js["movdetect"] = movdetect
         js["path"] = path
         js["popup"] = popup
-        with open('./config/cameras.json', 'r') as f:
-            js_ = json.load(f)
-        js_.append(js)
+        js["id"] = len(self.js)
+       # print(js)
+       # print(self.js)
+        self.js.append(js)
+       # print(self.js)
         with open('./config/cameras.json', 'w') as f:
-            json.dump(js_, f, indent=4)
-        print(js)
+            json.dump(self.js, f, indent=4)
+        #print(js)
         self.close()
 
     def ip_check(self,ip):

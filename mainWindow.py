@@ -27,7 +27,9 @@ class MainWindow(QMainWindow):
         settings = QMenu("Settings",self)
         new = settings.addMenu("Add camera")
 
-        change = settings.addMenu("Change camera")
+        self.change = settings.addMenu("Change camera")
+        self.js = read_config()
+        self.add_cameras_to_changecams()
         # TODO: read from settings file and display them under change add_action
         ip = new.addAction("IP")
         usb = new.addAction("USB")
@@ -52,12 +54,9 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(container)
 
 
-        #TODO: read from config file & start dis shit
-        #TODO: async video capture!
         self.threads = []
-        js = read_config()
-        for i in js:
-            id = i["idchoice"]
+        for i in self.js:
+            id = i["id"]
             print("WRITTEN:", id)
             self.threads.append(camThread(int(id)))
         print(f"Running {min(2,len(self.threads))} cams")
@@ -65,10 +64,6 @@ class MainWindow(QMainWindow):
             self.threads[i].change_pixmap_signal.connect(lambda cv_img: self.upd_cam(cv_img, i))
             self.threads[i].start()
         #TODO: for now, shows only 2 first cams! Make usr choose
-
-
-
-    #TODO: use only one func, with lambda
 
     def open_new_cam(self, type):
         self.newcam = newCamWindow(type)
@@ -89,7 +84,9 @@ class MainWindow(QMainWindow):
             print("UPDATING LABEL 2!")
             self.labelcam2.setPixmap(pixmap)
             print("LABEL 2 updated")
-
+    def add_cameras_to_changecams(self):
+        for i in self.js:
+            self.change.addAction(str(i["id"])+" - "+i["name"])
 
 
 

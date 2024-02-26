@@ -1,0 +1,22 @@
+[
+    {
+        "name": "TEST",
+        "idchoice": "0",
+        "movdetect": false,
+        "path": 0,
+        "popup": 0,
+        "id": 0
+    },
+    {
+        "name": "AAA",
+        "protocol": "HTTP",
+        "ip": "",
+        "hascreds": false,
+        "user": 0,
+        "passw": 0,
+        "movdetect": false,
+        "path": 0,
+        "popup": 0,
+        "id": 1
+    }
+]

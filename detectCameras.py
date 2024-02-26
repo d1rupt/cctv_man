@@ -2,8 +2,11 @@ import json
 import cv2
 
 def read_config():
-    with open('./config/cameras.json', 'r') as f:
-        js = json.load(f)
+    try:
+        with open('./config/cameras.json', 'r') as f:
+            js = json.load(f)
+    except:
+        js = []
     return js
 def list_cameras_ids():
     skip = []
@@ -22,3 +25,6 @@ def list_cameras_ids():
             cap.release()
         index += 1
     return arr
+
+
+print(read_config())
