@@ -42,11 +42,13 @@ class MainWindow(QMainWindow):
         container = QWidget()
 
         self.labelcam1 = QLabel()
+        self.labelcam1.setStyleSheet("background: gray;")
         self.labelcam1.resize(640, 480)
 
         self.layout.addWidget(self.labelcam1,0,1)
 
         self.labelcam2 = QLabel()
+        self.labelcam2.setStyleSheet("background: gray;")
         self.labelcam2.resize(640, 480)
         self.layout.addWidget(self.labelcam2, 1, 1)
 
@@ -55,7 +57,12 @@ class MainWindow(QMainWindow):
 
 
         self.threads = []
+        list = QListWidget()
+        label = QLabel("Configured cameras:")
+        self.layout.addWidget(label,0,0)
+        self.layout.addWidget(list, 1,0)
         for i in self.js:
+            QListWidgetItem(i["name"], list)
             id = i["id"]
             print("WRITTEN:", id, i["name"])
             self.threads.append(camThread(int(id)))
