@@ -126,10 +126,7 @@ class newCamWindow(QMainWindow):
         js["path"] = path
         js["popup"] = popup
         js["id"] = len(self.js)
-       # print(js)
-       # print(self.js)
         self.js.append(js)
-       # print(self.js)
         with open('./config/cameras.json', 'w') as f:
             json.dump(self.js, f, indent=4)
         #print(js)

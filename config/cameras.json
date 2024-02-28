@@ -18,5 +18,13 @@
         "path": 0,
         "popup": 0,
         "id": 1
+    },
+    {
+        "name": "Moo",
+        "idchoice": "",
+        "movdetect": false,
+        "path": 0,
+        "popup": 0,
+        "id": 2
     }
 ]
