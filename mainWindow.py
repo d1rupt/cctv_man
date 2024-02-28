@@ -57,7 +57,7 @@ class MainWindow(QMainWindow):
         self.threads = []
         for i in self.js:
             id = i["id"]
-            print("WRITTEN:", id)
+            print("WRITTEN:", id, i["name"])
             self.threads.append(camThread(int(id)))
         print(f"Running {min(2,len(self.threads))} cams")
         for i in range(min(2,len(self.threads))):
