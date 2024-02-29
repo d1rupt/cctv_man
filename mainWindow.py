@@ -9,6 +9,10 @@ from detectCameras import *
 import cv2
 
 app = QApplication([])
+screen_resolution = app.primaryScreen().size()
+width = screen_resolution.width()
+height = screen_resolution.height()
+
 
 #any settings changed - get written to a file
 #the MainWindow then accesses this file
@@ -24,18 +28,15 @@ class MainWindow(QMainWindow):
 
         menu = QMenuBar()
         self.setMenuBar(menu)
-        settings = QMenu("Settings",self)
-        new = settings.addMenu("Add camera")
-
-        self.change = settings.addMenu("Change camera")
+        self.settings = QMenu("Cameras",self)
         self.js = read_config()
         self.add_cameras_to_changecams()
-        ip = new.addAction("IP")
-        usb = new.addAction("USB")
+        ip = self.settings.addAction("New IP camera...")
+        usb = self.settings.addAction("New USB camera...")
         ip.triggered.connect(lambda x: self.open_new_cam("IP"))
         usb.triggered.connect(lambda x: self.open_new_cam("USB"))
 
-        menu.addMenu(settings)
+        menu.addMenu(self.settings)
         self.layout = QVBoxLayout()
         container = QWidget()
 
@@ -63,29 +64,32 @@ class MainWindow(QMainWindow):
     def camchoiceTabUi(self):
         camchoice = QWidget()
         layout = QVBoxLayout()
+        layout.setContentsMargins(0,0,0,0)
         self.list = QListWidget()
-        label = QLabel("Configured cameras:")
-        layout.addWidget(label, )
+        self.list.setFixedHeight(200)
         layout.addWidget(self.list, )
         choicecam1 = QComboBox()
         choicecam2 = QComboBox()
 
         layout.addWidget(choicecam1, )
         layout.addWidget(choicecam2, )
+        layout.setSpacing(0)
         camchoice.setLayout(layout)
         return camchoice
     def camViewTabUi(self):
+        global width
+        global height
         camView = QWidget()
-        layout = QVBoxLayout()
+        layout = QHBoxLayout()
 
         self.labelcam1 = QLabel()
         self.labelcam1.setStyleSheet("background: blue;")
-        self.labelcam1.resize(640, 480)
+        self.labelcam1.resize(width//2 - 10, height)
         layout.addWidget(self.labelcam1)
 
         self.labelcam2 = QLabel()
         self.labelcam2.setStyleSheet("background: green;")
-        self.labelcam2.resize(640, 480)
+        self.labelcam2.resize(width//2 - 10, height)
         layout.addWidget(self.labelcam2)
 
         camView.setLayout(layout)
@@ -101,8 +105,10 @@ class MainWindow(QMainWindow):
         self.camerasett.show()
     @pyqtSlot(numpy.ndarray)
     def upd_cam(self,cv_img,i):
+        global width
+        global height
         print("UPDATING CAM: ", i)
-        pixmap = convert_cv_qt(cv_img)
+        pixmap = convert_cv_qt(cv_img, width, height)
         if i == 0:
             print("UPDATING LABEL 1!")
             self.labelcam1.setPixmap(pixmap)
@@ -113,7 +119,7 @@ class MainWindow(QMainWindow):
             print("LABEL 2 updated")
     def add_cameras_to_changecams(self):
         for i in self.js:
-            self.change.addAction(str(i["id"])+" - "+i["name"])
+            self.settings.addAction(str(i["id"])+" - "+i["name"])
 
 
 
