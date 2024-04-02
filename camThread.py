@@ -3,6 +3,7 @@ import cv2
 import numpy
 from PyQt6.QtGui import *
 from detectCameras import *
+from datetime import datetime
 def convert_cv_qt(cv_img,width,height):
     rgb_image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
     h, w, ch = rgb_image.shape
@@ -11,6 +12,11 @@ def convert_cv_qt(cv_img,width,height):
     p = convert_to_Qt_format.scaled(width//2 - 10, height, Qt.AspectRatioMode.KeepAspectRatio)
     return QPixmap.fromImage(p)
 
+def get_date_time():
+
+    now = datetime.now()
+    dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+    return dt_string
 class camThread(QThread):
     change_pixmap_signal = pyqtSignal(numpy.ndarray)
     def __init__(self,id):
@@ -19,6 +25,7 @@ class camThread(QThread):
         self.run = True
         self.usb = False
         self.js = read_config()
+        self.name = self.js[id]["name"]
         if ("idchoice" in self.js[id].keys()):
             self.usb = True
 
@@ -33,9 +40,12 @@ class camThread(QThread):
 
                 ret, cv_img = c.read()
                 if ret:
-                    print("EMITTING SIGNAL")
+                    #print("Putting TEXT", self.name)
+                    cv_img = cv2.putText(cv_img, self.name, (10,20), 1, 1, (255,0,0),1 )
+                    cv_img = cv2.putText(cv_img, get_date_time(), (10, 50), 1, 1, (255, 0, 0), 1)
+                    #print("EMITTING SIGNAL")
                     self.change_pixmap_signal.emit(cv_img)
-                    print("EMITTED")
+                    #print("EMITTED")
             c.release()
 
         else:

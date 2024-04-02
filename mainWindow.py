@@ -42,8 +42,11 @@ class MainWindow(QMainWindow):
 
         container.setLayout(self.layout)
         self.setCentralWidget(container)
+        self.running_cans = [0,0]
+        self.threads = []
+        self.choicecam2.currentIndexChanged.connect(lambda x: self.change_showing_cams(2, x))
+        self.choicecam1.currentIndexChanged.connect(lambda x: self.change_showing_cams(1, x))
         self.reload_cams()
-
         #TODO: for now, shows only 2 first cams! Make usr choose
     def camchoiceTabUi(self):
         camchoice = QWidget()
@@ -54,6 +57,7 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.list, )
         self.choicecam1 = QComboBox()
         self.choicecam2 = QComboBox()
+
         layout.addWidget(self.choicecam1, )
         layout.addWidget(self.choicecam2, )
         self.button = QPushButton("Update")
@@ -93,16 +97,16 @@ class MainWindow(QMainWindow):
     def upd_cam(self,cv_img,i):
         global width
         global height
-        print("UPDATING CAM: ", i)
+        #print("UPDATING CAM: ", i)
         pixmap = convert_cv_qt(cv_img, width, height)
         if i == 0:
-            print("UPDATING LABEL 1!")
+            #print("UPDATING LABEL 1!")
             self.labelcam1.setPixmap(pixmap)
-            print("LABEL 1 updated")
+            #print("LABEL 1 updated")
         else:
-            print("UPDATING LABEL 2!")
+            #print("UPDATING LABEL 2!")
             self.labelcam2.setPixmap(pixmap)
-            print("LABEL 2 updated")
+            #print("LABEL 2 updated")
     def add_cameras_to_changecams(self):
         self.settings.clear()
         ip = self.settings.addAction("New IP camera...")
@@ -111,23 +115,29 @@ class MainWindow(QMainWindow):
         usb.triggered.connect(lambda x: self.open_new_cam("USB"))
 
         self.menu.addMenu(self.settings)
-
+        cams_menu = []
         for i in self.js:
-            self.settings.addAction(str(i["id"])+" - "+i["name"])
+            (self.settings.addAction(str(i["id"])+" - "+i["name"])).triggered.connect(lambda x: self.open_camera_sett(i["id"]))
 
     def reload_cams(self):
         #reloads cam listing, cam choice
         self.js = read_config()
-        try:
-            for i in self.threads:
+        print("STOPPING THREADS")
+        for i in self.threads:
+            try:
+                i.run = False
                 i.terminate()
-        except:
-            pass
-
+            except: pass
         self.threads = []
+
         self.list.clear()
+
+        self.choicecam1.currentIndexChanged.disconnect()
+        self.choicecam2.currentIndexChanged.disconnect()
+        print("DISCONNECT")
         self.choicecam1.clear()
         self.choicecam2.clear()
+
         for i in self.js:
             QListWidgetItem(i["name"], self.list)
             id = i["id"]
@@ -135,13 +145,24 @@ class MainWindow(QMainWindow):
             self.threads.append(camThread(int(id)))
             self.choicecam1.addItem(i["name"])
             self.choicecam2.addItem(i["name"])
+
+        self.choicecam1.setCurrentIndex(self.running_cans[0])
+        self.choicecam2.setCurrentIndex(self.running_cans[1])
+        print("CONNECT")
+        self.choicecam2.currentIndexChanged.connect(lambda x: self.change_showing_cams(2, x))
+        self.choicecam1.currentIndexChanged.connect(lambda x: self.change_showing_cams(1, x))
         print(f"Running {min(2, len(self.threads))} cams")
-        for i in range(min(2, len(self.threads))):
+
+        for i in self.running_cans:
             self.threads[i].change_pixmap_signal.connect(lambda cv_img: self.upd_cam(cv_img, i))
             self.threads[i].start()
 
         self.add_cameras_to_changecams()
 
+    def change_showing_cams(self, i ,ind):
+        print('ok')
+        self.running_cans[i-1] = ind
+        print(self.running_cans)
 window = MainWindow()
 
 
