@@ -2,14 +2,18 @@ import json
 
 from PyQt6.QtWidgets import *
 from detectCameras import list_cameras_ids, read_config
-from json import *
+
 
 class newCamWindow(QMainWindow):
-    def __init__(self, type):
+    def __init__(self, type, id=None):
+        self.id = id
+
         super().__init__()
         self.js = read_config()
+        if self.id != None:
+            self.data = self.js[self.id]
         self.type = type
-        self.setWindowTitle(f"New camera - {type}")
+        self.setWindowTitle(f"Camera - {type}")
         self.setMinimumSize(500, 500)
         self.layout = QGridLayout()
         self.container = QWidget()
@@ -20,6 +24,7 @@ class newCamWindow(QMainWindow):
         self.name = QLineEdit()
         self.layout.addWidget(self.label,0,0)
         self.layout.addWidget(self.name,0,1)
+
         if type == "IP":
             self.label0 = QLabel("Connection protocol")
             self.protocol = QComboBox()
@@ -57,16 +62,24 @@ class newCamWindow(QMainWindow):
             self.layout.addWidget(self.user, 4,1)
             self.layout.addWidget(self.label4,5,0)
             self.layout.addWidget(self.passw,5,1)
+            if self.id != None:
+                self.protocol.setCurrentIndex(self.protocol.findText(self.data["protocol"]))
+                self.ip.setText(self.data["ip"])
+
 
         else:
             self.label5 = QLabel("Available cameras")
             ids = list_cameras_ids()
+            print('inserting ids')
             self.idchoice = QComboBox()
             for id in ids:
                 self.idchoice.addItem(str(id))
 
             self.layout.addWidget(self.label5,1,0)
             self.layout.addWidget(self.idchoice,1,1)
+            if self.id!= None:
+                data = self.js[self.id]
+                self.idchoice.addItem(data["idchoice"])
 
 
         self.label6 = QLabel("Movement detection")
@@ -92,6 +105,8 @@ class newCamWindow(QMainWindow):
 
         self.apply = QPushButton("Apply")
         self.apply.clicked.connect(self.apply_close)
+        if self.id != None:
+            self.name.setText(self.data["name"])
         self.layout.addWidget(self.apply,30,1)
 
     def apply_close(self):
@@ -125,8 +140,15 @@ class newCamWindow(QMainWindow):
         js["movdetect"] = movdetect
         js["path"] = path
         js["popup"] = popup
-        js["id"] = len(self.js)
-        self.js.append(js)
+
+        if self.id == None:
+            js["id"] = len(self.js)
+            self.js.append(js)
+        else:
+            print("REWRITING")
+            js["id"] = self.id
+            print(js)
+            self.js[self.id] = js
         with open('./config/cameras.json', 'w') as f:
             json.dump(self.js, f, indent=4)
         #print(js)

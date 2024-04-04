@@ -3,7 +3,6 @@ from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
 from newCamWindow import *
-from cameraSettings import *
 from camThread import *
 from detectCameras import *
 import cv2
@@ -12,10 +11,6 @@ app = QApplication([])
 screen_resolution = app.primaryScreen().size()
 width = screen_resolution.width()
 height = screen_resolution.height()
-
-
-#any settings changed - get written to a file
-#the MainWindow then accesses this file
 
 class MainWindow(QMainWindow):
 
@@ -42,7 +37,7 @@ class MainWindow(QMainWindow):
 
         container.setLayout(self.layout)
         self.setCentralWidget(container)
-        self.running_cans = [0,0]
+        self.running_cans = [None, None]
         self.threads = []
         self.choicecam2.currentIndexChanged.connect(lambda x: self.change_showing_cams(2, x))
         self.choicecam1.currentIndexChanged.connect(lambda x: self.change_showing_cams(1, x))
@@ -93,7 +88,10 @@ class MainWindow(QMainWindow):
     def open_camera_sett(self, id):
         def on_triggered():
             print(f"ID: {id}")
-            self.camerasett = cameraSettings(id)
+            if "protocol" in self.js[id]:
+                self.camerasett = newCamWindow("IP", id)
+            else:
+                self.camerasett = newCamWindow("USB", id)
             self.camerasett.show()
         return on_triggered
     @pyqtSlot(numpy.ndarray)
@@ -154,16 +152,19 @@ class MainWindow(QMainWindow):
             self.choicecam1.addItem(i["name"])
             self.choicecam2.addItem(i["name"])
 
-        self.choicecam1.setCurrentIndex(self.running_cans[0])
-        self.choicecam2.setCurrentIndex(self.running_cans[1])
+        if self.running_cans[0]!=None:
+            self.choicecam1.setCurrentIndex(self.running_cans[0])
+        if self.running_cans[1]!=None:
+            self.choicecam2.setCurrentIndex(self.running_cans[1])
         print("CONNECT")
         self.choicecam2.currentIndexChanged.connect(lambda x: self.change_showing_cams(2, x))
         self.choicecam1.currentIndexChanged.connect(lambda x: self.change_showing_cams(1, x))
         print(f"Running {min(2, len(self.threads))} cams")
 
         for i in self.running_cans:
-            self.threads[i].change_pixmap_signal.connect(lambda cv_img: self.upd_cam(cv_img, i))
-            self.threads[i].start()
+            if i != None:
+                self.threads[i].change_pixmap_signal.connect(lambda cv_img: self.upd_cam(cv_img, i))
+                self.threads[i].start()
 
         self.add_cameras_to_changecams()
 
