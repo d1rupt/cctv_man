@@ -91,8 +91,11 @@ class MainWindow(QMainWindow):
         self.newcam.show()
 
     def open_camera_sett(self, id):
-        self.camerasett = cameraSettings(id)
-        self.camerasett.show()
+        def on_triggered():
+            print(f"ID: {id}")
+            self.camerasett = cameraSettings(id)
+            self.camerasett.show()
+        return on_triggered
     @pyqtSlot(numpy.ndarray)
     def upd_cam(self,cv_img,i):
         global width
@@ -111,13 +114,18 @@ class MainWindow(QMainWindow):
         self.settings.clear()
         ip = self.settings.addAction("New IP camera...")
         usb = self.settings.addAction("New USB camera...")
+
+        cams_menu = []
+        for i in self.js:
+            id = i["id"]
+            print(id)
+
+            self.settings.addAction(str(id)+" - "+i["name"]).triggered.connect(self.open_camera_sett(id))
+
         ip.triggered.connect(lambda x: self.open_new_cam("IP"))
         usb.triggered.connect(lambda x: self.open_new_cam("USB"))
 
         self.menu.addMenu(self.settings)
-        cams_menu = []
-        for i in self.js:
-            (self.settings.addAction(str(i["id"])+" - "+i["name"])).triggered.connect(lambda x: self.open_camera_sett(i["id"]))
 
     def reload_cams(self):
         #reloads cam listing, cam choice
