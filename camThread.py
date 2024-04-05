@@ -4,6 +4,7 @@ import numpy
 from PyQt6.QtGui import *
 from detectCameras import *
 from datetime import datetime
+from windows_toasts import Toast, WindowsToaster
 from mov_detection.detect import detect_mov
 from mov_detection.get_background import get_background
 
@@ -34,18 +35,27 @@ class camThread(QThread):
 
     #TODO: change this to capture IP ALSO!!! for now only usb
     def run(self):
+        self.toaster = WindowsToaster('Python')
         #print('running', self.id)
         if self.usb:
             print('running', self.id)
             print("thread: ", int(self.js[self.id]["idchoice"]))
             c = cv2.VideoCapture(int(self.js[self.id]["idchoice"]))
             background = get_background(c)
+            notif = False
             while self.run:
 
                 ret, cv_img = c.read()
                 if ret:
                     #detect movement
-                    cv_img = detect_mov(background, cv_img)
+                    cv_img, movement = detect_mov(background, cv_img)
+                    if movement == True and notif == False:
+                        print("SENDING NOTIF")
+                        notif = True
+                        self.notification()
+                    elif movement == False:
+                        notif = False
+
                     cv_img = cv2.putText(cv_img, self.name, (10,20), 1, 1, (255,0,0),1 )
                     cv_img = cv2.putText(cv_img, get_date_time(), (10, 50), 1, 1, (255, 0, 0), 1)
                     self.change_pixmap_signal.emit(cv_img)
@@ -54,4 +64,10 @@ class camThread(QThread):
         else:
             #ip capture
             pass
+
+    def notification(self):
+        self.newToast = Toast()
+        self.newToast.text_fields = [f'[{self.name}] - Movement Detected!']
+        self.toaster.show_toast(self.newToast)
+
 

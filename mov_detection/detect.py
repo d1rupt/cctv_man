@@ -2,6 +2,7 @@ import cv2
 
 
 def detect_mov(background, cv_img):
+    movement = False
     orig_frame = cv_img.copy()
     gray = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
 
@@ -17,7 +18,8 @@ def detect_mov(background, cv_img):
         if cv2.contourArea(contour) < 500:
             continue
         (x,y,w,h) = cv2.boundingRect(contour)
+        movement = True
 
         cv2.rectangle(orig_frame, (x,y), (x+w, y+h), (0,255,0), 2)
 
-    return orig_frame
+    return orig_frame, movement
