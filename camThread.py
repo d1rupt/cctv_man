@@ -33,29 +33,33 @@ class camThread(QThread):
         if ("idchoice" in self.js[id].keys()):
             self.usb = True
 
+
     #TODO: change this to capture IP ALSO!!! for now only usb
     def run(self):
         self.toaster = WindowsToaster('Python')
-        #print('running', self.id)
-        if self.usb:
+        if self.usb: #this is a usb camera
             print('running', self.id)
             print("thread: ", int(self.js[self.id]["idchoice"]))
             c = cv2.VideoCapture(int(self.js[self.id]["idchoice"]))
+
+            #calculate background for movement capture
             background = get_background(c)
+
             notif = False
             while self.run:
 
                 ret, cv_img = c.read()
                 if ret:
-                    #detect movement
+                    #detects movement and draws contours arount new objects
                     cv_img, movement = detect_mov(background, cv_img)
                     if movement == True and notif == False:
-                        print("SENDING NOTIF")
+
                         notif = True
+                        #sends nodification using windows_toasts lib
                         self.notification()
                     elif movement == False:
                         notif = False
-
+                    #add name & time to camera feed
                     cv_img = cv2.putText(cv_img, self.name, (10,20), 1, 1, (255,0,0),1 )
                     cv_img = cv2.putText(cv_img, get_date_time(), (10, 50), 1, 1, (255, 0, 0), 1)
                     self.change_pixmap_signal.emit(cv_img)
@@ -63,7 +67,14 @@ class camThread(QThread):
 
         else:
             #ip capture
-            pass
+            ip = self.js[self.id]["ip"]
+            protocol = self.js[self.id]["protocol"]
+            creds = ""
+            if self.js[self.id]["user"]:
+                creds = f"{self.js[self.id]['user']}:{self.js[self.id]['passw']}@"
+            print(f'{protocol}://{creds}{ip}')
+            c =cv2.VideoCapture(f'{protocol}://{creds}{ip}')
+
 
     def notification(self):
         self.newToast = Toast()

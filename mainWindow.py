@@ -37,12 +37,12 @@ class MainWindow(QMainWindow):
 
         container.setLayout(self.layout)
         self.setCentralWidget(container)
-        self.running_cans = [None, None]
+        self.running_cans = [0,0]
         self.threads = []
-        self.choicecam2.currentIndexChanged.connect(lambda x: self.change_showing_cams(2, x))
-        self.choicecam1.currentIndexChanged.connect(lambda x: self.change_showing_cams(1, x))
+        #self.choicecam2.currentIndexChanged.connect(lambda x: self.change_showing_cams(2, x))
+        #self.choicecam1.currentIndexChanged.connect(lambda x: self.change_showing_cams(1, x))
         self.reload_cams()
-        #TODO: for now, shows only 2 first cams! Make usr choose
+
     def camchoiceTabUi(self):
         camchoice = QWidget()
         layout = QVBoxLayout()
@@ -95,20 +95,22 @@ class MainWindow(QMainWindow):
             self.camerasett.show()
         return on_triggered
     @pyqtSlot(numpy.ndarray)
-    def upd_cam(self,cv_img,i):
+    def upd_cam(self,cv_img,index, i): #show next frame
+        print("Updating", self.running_cans, i)
         global width
         global height
         #print("UPDATING CAM: ", i)
+        #convert frame format
         pixmap = convert_cv_qt(cv_img, width, height)
-        if i == 0:
+        if index == 0:
             #print("UPDATING LABEL 1!")
             self.labelcam1.setPixmap(pixmap)
             #print("LABEL 1 updated")
-        else:
+        elif index == 1:
             #print("UPDATING LABEL 2!")
             self.labelcam2.setPixmap(pixmap)
             #print("LABEL 2 updated")
-    def add_cameras_to_changecams(self):
+    def add_cameras_to_changecams(self): #list configured cameras in settings menu
         self.settings.clear()
         ip = self.settings.addAction("New IP camera...")
         usb = self.settings.addAction("New USB camera...")
@@ -125,8 +127,10 @@ class MainWindow(QMainWindow):
 
         self.menu.addMenu(self.settings)
 
-    def reload_cams(self):
+    def reload_cams(self): #read config file to update ui; change currently showing cameras if user changed
         #reloads cam listing, cam choice
+        self.running_cans[0] = self.choicecam1.currentIndex()
+        self.running_cans[1] = self.choicecam2.currentIndex()
         self.js = read_config()
         print("STOPPING THREADS")
         for i in self.threads:
@@ -138,8 +142,8 @@ class MainWindow(QMainWindow):
 
         self.list.clear()
 
-        self.choicecam1.currentIndexChanged.disconnect()
-        self.choicecam2.currentIndexChanged.disconnect()
+        #self.choicecam1.currentIndexChanged.disconnect()
+        #self.choicecam2.currentIndexChanged.disconnect()
         print("DISCONNECT")
         self.choicecam1.clear()
         self.choicecam2.clear()
@@ -151,20 +155,26 @@ class MainWindow(QMainWindow):
             self.threads.append(camThread(int(id)))
             self.choicecam1.addItem(i["name"])
             self.choicecam2.addItem(i["name"])
-
+        self.choicecam1.addItem("None")
+        self.choicecam2.addItem("None")
         if self.running_cans[0]!=None:
             self.choicecam1.setCurrentIndex(self.running_cans[0])
         if self.running_cans[1]!=None:
             self.choicecam2.setCurrentIndex(self.running_cans[1])
-        print("CONNECT")
-        self.choicecam2.currentIndexChanged.connect(lambda x: self.change_showing_cams(2, x))
-        self.choicecam1.currentIndexChanged.connect(lambda x: self.change_showing_cams(1, x))
-        print(f"Running {min(2, len(self.threads))} cams")
 
+        #self.choicecam2.currentIndexChanged.connect(lambda x: self.change_showing_cams(2, x))
+        #self.choicecam1.currentIndexChanged.connect(lambda x: self.change_showing_cams(1, x))
+        print("CONNECT")
+        print(f"Running {min(2, len(self.threads))} cams")
         for i in self.running_cans:
-            if i != None:
-                self.threads[i].change_pixmap_signal.connect(lambda cv_img: self.upd_cam(cv_img, i))
+            print(self.running_cans, i, self.running_cans.index(i))
+            if i != (self.choicecam1.count()-1) and i!=-1:
+                #print("Starting thread")
+                print("RUNNING INDEX", i)
+                self.threads[i].change_pixmap_signal.connect(lambda cv_img, i=i: self.upd_cam(cv_img, (self.running_cans.index(i)), i))
                 self.threads[i].start()
+            else:
+                print("None")
 
         self.add_cameras_to_changecams()
 
@@ -172,6 +182,8 @@ class MainWindow(QMainWindow):
         print('ok')
         self.running_cans[i-1] = ind
         print(self.running_cans)
+
+
 window = MainWindow()
 
 

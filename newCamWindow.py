@@ -82,26 +82,26 @@ class newCamWindow(QMainWindow):
                 self.idchoice.addItem(data["idchoice"])
 
 
-        self.label6 = QLabel("Movement detection")
-        self.movdetect = QCheckBox()
-        self.movdetect.stateChanged.connect(self.show_movdetect_options)
+        #self.label6 = QLabel("Movement detection")
+        #self.movdetect = QCheckBox()
+        #self.movdetect.stateChanged.connect(self.show_movdetect_options)
 
-        self.layout.addWidget(self.label6,20,0)
-        self.layout.addWidget(self.movdetect,20,1)
+        #self.layout.addWidget(self.label6,20,0)
+        #self.layout.addWidget(self.movdetect,20,1)
 
-        self.label7 = QLabel("Absolute path to video storage")
-        self.path = QLineEdit()
+        #self.label7 = QLabel("Absolute path to video storage")
+        #self.path = QLineEdit()
 
-        self.label8 = QLabel("Notify using pop-ups when motion is detected")
-        self.popup = QCheckBox()
+        #self.label8 = QLabel("Notify using pop-ups when motion is detected")
+        #self.popup = QCheckBox()
 
-        self.layout.addWidget(self.label7, 21,0)
-        self.layout.addWidget(self.path,21,1)
-        self.layout.addWidget(self.label8,22,0)
-        self.layout.addWidget(self.popup,22,1)
+        #self.layout.addWidget(self.label7, 21,0)
+        #self.layout.addWidget(self.path,21,1)
+        #self.layout.addWidget(self.label8,22,0)
+        #self.layout.addWidget(self.popup,22,1)
 
-        self.list_movdetect = [self.label7, self.path, self.label8, self.popup]
-        self.hide_show(self.list_movdetect, False)
+        #self.list_movdetect = [self.label7, self.path, self.label8, self.popup]
+        #self.hide_show(self.list_movdetect, False)
 
         self.apply = QPushButton("Apply")
         self.apply.clicked.connect(self.apply_close)
@@ -110,6 +110,7 @@ class newCamWindow(QMainWindow):
         self.layout.addWidget(self.apply,30,1)
 
     def apply_close(self):
+        print("writing")
         js = {}
         js["name"] = self.name.text()
         if self.type == "IP":
@@ -121,8 +122,8 @@ class newCamWindow(QMainWindow):
             if hascreds:
                 user = self.user.text()
                 passw = self.passw.text()
-            js["protocol"] = protocol
-            js["ip"] = ip
+            js["protocol"] = protocol.lower()
+            js["ip"] = ip.lower()
             js["hascreds"] = hascreds
             js["user"] = user
             js["passw"] = passw
@@ -131,15 +132,17 @@ class newCamWindow(QMainWindow):
         else:
             idchoice = self.idchoice.currentText()
             js["idchoice"] = idchoice
-        movdetect = self.movdetect.isChecked()
-        path = 0
-        popup = 0
-        if movdetect:
-            path = self.path.text()
-            popup = self.popup.isChecked()
+        #movdetect = self.movdetect.isChecked()
+        #path = 0
+        #popup = 0
+        #if movdetect:
+            #path = self.path.text()
+            #popup = self.popup.isChecked()
+        '''
         js["movdetect"] = movdetect
         js["path"] = path
         js["popup"] = popup
+        '''
 
         if self.id == None:
             js["id"] = len(self.js)
