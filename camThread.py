@@ -40,40 +40,46 @@ class camThread(QThread):
         if self.usb: #this is a usb camera
             print('running', self.id)
             print("thread: ", int(self.js[self.id]["idchoice"]))
-            c = cv2.VideoCapture(int(self.js[self.id]["idchoice"]))
-
-            #calculate background for movement capture
-            background = get_background(c)
-
-            notif = False
-            while self.run:
-
-                ret, cv_img = c.read()
-                if ret:
-                    #detects movement and draws contours arount new objects
-                    cv_img, movement = detect_mov(background, cv_img)
-                    if movement == True and notif == False:
-
-                        notif = True
-                        #sends nodification using windows_toasts lib
-                        self.notification()
-                    elif movement == False:
-                        notif = False
-                    #add name & time to camera feed
-                    cv_img = cv2.putText(cv_img, self.name, (10,20), 1, 1, (255,0,0),1 )
-                    cv_img = cv2.putText(cv_img, get_date_time(), (10, 50), 1, 1, (255, 0, 0), 1)
-                    self.change_pixmap_signal.emit(cv_img)
-            c.release()
-
+            try:
+                c = cv2.VideoCapture(int(self.js[self.id]["idchoice"]))
+            except:
+                print("Failed USB capture")
+                self.run = False
         else:
-            #ip capture
+            # ip capture
             ip = self.js[self.id]["ip"]
             protocol = self.js[self.id]["protocol"]
             creds = ""
             if self.js[self.id]["user"]:
                 creds = f"{self.js[self.id]['user']}:{self.js[self.id]['passw']}@"
             print(f'{protocol}://{creds}{ip}')
-            c =cv2.VideoCapture(f'{protocol}://{creds}{ip}')
+            try:
+                c = cv2.VideoCapture(f'{protocol}://{creds}{ip}')
+            except:
+                print("Failed IP captute")
+                self.run = False
+            #calculate background for movement capture
+        background = get_background(c)
+
+        notif = False
+        while self.run:
+
+            ret, cv_img = c.read()
+            if ret:
+                #detects movement and draws contours arount new objects
+                cv_img, movement = detect_mov(background, cv_img)
+                if movement == True and notif == False:
+
+                    notif = True
+                    #sends nodification using windows_toasts lib
+                    self.notification()
+                elif movement == False:
+                    notif = False
+                #add name & time to camera feed
+                cv_img = cv2.putText(cv_img, self.name, (10,20), 1, 1, (255,0,0),1 )
+                cv_img = cv2.putText(cv_img, get_date_time(), (10, 50), 1, 1, (255, 0, 0), 1)
+                self.change_pixmap_signal.emit(cv_img)
+        c.release()
 
 
     def notification(self):
