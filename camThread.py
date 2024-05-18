@@ -9,6 +9,7 @@ from mov_detection.detect import detect_mov
 from mov_detection.get_background import get_background
 
 def convert_cv_qt(cv_img,width,height):
+    #convert cv frame to qt frame to display
     rgb_image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
     h, w, ch = rgb_image.shape
     bytes_per_line = ch * w
@@ -17,11 +18,13 @@ def convert_cv_qt(cv_img,width,height):
     return QPixmap.fromImage(p)
 
 def get_date_time():
-
+    #get current time
     now = datetime.now()
     dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
     return dt_string
 class camThread(QThread):
+    #camera thread
+
     change_pixmap_signal = pyqtSignal(numpy.ndarray)
     def __init__(self,id):
         super().__init__()
@@ -33,20 +36,14 @@ class camThread(QThread):
         if ("idchoice" in self.js[id].keys()):
             self.usb = True
 
-
-    #TODO: change this to capture IP ALSO!!! for now only usb
     def run(self):
         self.toaster = WindowsToaster('Python')
-        if self.usb: #this is a usb camera
-            print('running', self.id)
-            print("thread: ", int(self.js[self.id]["idchoice"]))
+        if self.usb:
             try:
                 c = cv2.VideoCapture(int(self.js[self.id]["idchoice"]))
             except:
-                print("Failed USB capture")
                 self.run = False
         else:
-            # ip capture
             ip = self.js[self.id]["ip"]
             protocol = self.js[self.id]["protocol"]
             creds = ""
@@ -56,7 +53,6 @@ class camThread(QThread):
             try:
                 c = cv2.VideoCapture(f'{protocol}://{creds}{ip}')
             except:
-                print("Failed IP captute")
                 self.run = False
             #calculate background for movement capture
         background = get_background(c)
