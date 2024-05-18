@@ -2,7 +2,7 @@ from PyQt6.QtCore import QThread, pyqtSignal, pyqtSlot, Qt
 import cv2
 import numpy
 from PyQt6.QtGui import *
-from detectCameras import *
+from detectCameras import read_config
 from datetime import datetime
 from windows_toasts import Toast, WindowsToaster
 from mov_detection.detect import detect_mov

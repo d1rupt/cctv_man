@@ -15,7 +15,7 @@ def list_cameras_ids():
         if "idchoice" in i.keys():
             skip.append(int(i["idchoice"]))
     arr = []
-    for index in range(10):
+    for index in range(-1, 10):
         if index not in skip:
             print(f"TRYING INDEX{index}")
             try:

@@ -1,11 +1,9 @@
 import numpy
 from PyQt6.QtWidgets import *
-from PyQt6.QtGui import *
 from PyQt6.QtCore import *
-from newCamWindow import *
-from camThread import *
-from detectCameras import *
-import cv2
+from newCamWindow import newCamWindow
+from camThread import convert_cv_qt, camThread
+from detectCameras import read_config
 
 app = QApplication([])
 screen_resolution = app.primaryScreen().size()
