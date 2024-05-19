@@ -14,7 +14,7 @@ def convert_cv_qt(cv_img,width,height):
     h, w, ch = rgb_image.shape
     bytes_per_line = ch * w
     convert_to_Qt_format = QImage(rgb_image.data, w, h, bytes_per_line, QImage.Format.Format_RGB888)
-    p = convert_to_Qt_format.scaled(width//2 - 10, height, Qt.AspectRatioMode.KeepAspectRatio)
+    p = convert_to_Qt_format.scaled((width-115)//2, height, Qt.AspectRatioMode.KeepAspectRatio)
     return QPixmap.fromImage(p)
 
 def get_date_time():
