@@ -41,6 +41,7 @@ class camThread(QThread):
         if self.usb:
             try:
                 c = cv2.VideoCapture(int(self.js[self.id]["idchoice"]))
+                background = get_background(c)
             except:
                 self.run = False
         else:
@@ -52,10 +53,11 @@ class camThread(QThread):
             print(f'{protocol}://{creds}{ip}')
             try:
                 c = cv2.VideoCapture(f'{protocol}://{creds}{ip}')
+                # calculate background for movement capture
+                background = get_background(c)
             except:
                 self.run = False
-            #calculate background for movement capture
-        background = get_background(c)
+
 
         notif = False
         while self.run:
@@ -65,7 +67,6 @@ class camThread(QThread):
                 #detects movement and draws contours arount new objects
                 cv_img, movement = detect_mov(background, cv_img)
                 if movement == True and notif == False:
-
                     notif = True
                     #sends nodification using windows_toasts lib
                     self.notification()

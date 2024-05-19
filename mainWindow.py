@@ -36,7 +36,7 @@ class MainWindow(QMainWindow):
 
         container.setLayout(self.layout)
         self.setCentralWidget(container)
-        self.running_cans = [0,0]
+        self.running_cams = [0, 0]
         self.threads = []
         self.reload_cams()
 
@@ -115,7 +115,6 @@ class MainWindow(QMainWindow):
 
         for i in self.js:
             id = i["id"]
-            print(id)
 
             self.settings.addAction(str(id)+" - "+i["name"]).triggered.connect(self.open_camera_sett(id))
 
@@ -127,8 +126,8 @@ class MainWindow(QMainWindow):
     def reload_cams(self):
         #read config file to update ui (list and choicelist)
         #change currently showing cameras if user changed his choice
-        self.running_cans[0] = self.choicecam1.currentIndex()
-        self.running_cans[1] = self.choicecam2.currentIndex()
+        self.running_cams[0] = self.choicecam1.currentIndex()
+        self.running_cams[1] = self.choicecam2.currentIndex()
         self.js = read_config()
         for i in self.threads:
             try:
@@ -150,15 +149,14 @@ class MainWindow(QMainWindow):
             self.choicecam2.addItem(i["name"])
         self.choicecam1.addItem("None")
         self.choicecam2.addItem("None")
-        if self.running_cans[0]!=None:
-            self.choicecam1.setCurrentIndex(self.running_cans[0])
-        if self.running_cans[1]!=None:
-            self.choicecam2.setCurrentIndex(self.running_cans[1])
+        if self.running_cams[0]!=None:
+            self.choicecam1.setCurrentIndex(self.running_cams[0])
+        if self.running_cams[1]!=None:
+            self.choicecam2.setCurrentIndex(self.running_cams[1])
 
-        for i in self.running_cans:
-            print(self.running_cans, i, self.running_cans.index(i))
+        for i in self.running_cams:
             if i != (self.choicecam1.count()-1) and i!=-1:
-                self.threads[i].change_pixmap_signal.connect(lambda cv_img, i=i: self.upd_cam(cv_img, (self.running_cans.index(i)), i))
+                self.threads[i].change_pixmap_signal.connect(lambda cv_img, i=i: self.upd_cam(cv_img, (self.running_cams.index(i)), i))
                 self.threads[i].start()
 
         self.add_cameras_to_changecams()
