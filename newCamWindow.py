@@ -1,5 +1,4 @@
 import json
-
 from PyQt6.QtWidgets import *
 from detectCameras import list_cameras_ids, read_config
 

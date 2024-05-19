@@ -1,4 +1,4 @@
-from PyQt6.QtCore import QThread, pyqtSignal, pyqtSlot, Qt
+from PyQt6.QtCore import QThread, pyqtSignal, Qt
 import cv2
 import numpy
 from PyQt6.QtGui import *
@@ -73,6 +73,7 @@ class camThread(QThread):
                     self.notification()
 
                     filename = (f"./movement/{self.name}_{get_date_time().replace(' ', '_').replace('/', '-').replace(':', '-')}.avi")
+                    #you might need to install XVID codec: https://www.xvid.com/download/
                     out = cv2.VideoWriter(filename, cv2.VideoWriter_fourcc(*"XVID"), c.get(cv2.CAP_PROP_FPS), (int(c.get(cv2.CAP_PROP_FRAME_WIDTH)),int(c.get(cv2.CAP_PROP_FRAME_HEIGHT))))
                     out.write(cv_img)
                 elif movement == False and notif == True:
