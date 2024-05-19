@@ -66,13 +66,21 @@ class camThread(QThread):
             if ret:
                 #detects movement and draws contours arount new objects
                 cv_img, movement = detect_mov(background, cv_img)
+
                 if movement == True and notif == False:
                     notif = True
                     #sends nodification using windows_toasts lib
                     self.notification()
-                elif movement == False:
+
+                    filename = (f"./movement/{self.name}_{get_date_time().replace(' ', '_').replace('/', '-').replace(':', '-')}.avi")
+                    out = cv2.VideoWriter(filename, cv2.VideoWriter_fourcc(*"XVID"), c.get(cv2.CAP_PROP_FPS), (int(c.get(cv2.CAP_PROP_FRAME_WIDTH)),int(c.get(cv2.CAP_PROP_FRAME_HEIGHT))))
+                    out.write(cv_img)
+                elif movement == False and notif == True:
                     notif = False
+                    out.release()
                 #add name & time to camera feed
+                if notif == True:
+                    out.write(cv_img)
                 cv_img = cv2.putText(cv_img, self.name, (10,20), 1, 1, (255,0,0),1 )
                 cv_img = cv2.putText(cv_img, get_date_time(), (10, 50), 1, 1, (255, 0, 0), 1)
                 self.change_pixmap_signal.emit(cv_img)
