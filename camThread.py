@@ -7,7 +7,7 @@ from datetime import datetime
 from windows_toasts import Toast, WindowsToaster
 from mov_detection.detect import detect_mov
 from mov_detection.get_background import get_background
-
+import pathlib
 def convert_cv_qt(cv_img,width,height):
     #convert cv frame to qt frame to display
     rgb_image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
@@ -71,7 +71,7 @@ class camThread(QThread):
                     notif = True
                     #sends nodification using windows_toasts lib
                     self.notification()
-
+                    pathlib.Path('./movement/').mkdir(parents=True, exist_ok=True)
                     filename = (f"./movement/{self.name}_{get_date_time().replace(' ', '_').replace('/', '-').replace(':', '-')}.avi")
                     #you might need to install XVID codec: https://www.xvid.com/download/
                     out = cv2.VideoWriter(filename, cv2.VideoWriter_fourcc(*"XVID"), c.get(cv2.CAP_PROP_FPS), (int(c.get(cv2.CAP_PROP_FRAME_WIDTH)),int(c.get(cv2.CAP_PROP_FRAME_HEIGHT))))

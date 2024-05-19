@@ -1,6 +1,6 @@
 import json
 import cv2
-
+import pathlib
 def read_config():
     #reads cameras.json
     try:
@@ -8,6 +8,11 @@ def read_config():
             js = json.load(f)
     except:
         js = []
+        json_object = json.dumps(js, indent=4)
+        pathlib.Path('./config/').mkdir(parents=True, exist_ok=True)
+        with open("./config/cameras.json", "w") as outfile:
+            outfile.write(json_object)
+
     return js
 def list_cameras_ids():
     #gets ids of cameras connected, except the ones already configured

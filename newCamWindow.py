@@ -116,6 +116,7 @@ class newCamWindow(QMainWindow):
         else:
             js["id"] = self.id
             self.js[self.id] = js
+        read_config()
         with open('./config/cameras.json', 'w') as f:
             json.dump(self.js, f, indent=4)
         self.close()
